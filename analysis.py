@@ -17,6 +17,8 @@ income_before_tax = []
 income_tax_expense = []
 operating_income = []
 assets = []
+operating_cashflow = []
+capital_expendiatures = []
 
 def clearLists():
     close.clear()
@@ -31,6 +33,8 @@ def clearLists():
     income_tax_expense.clear()
     operating_income.clear()
     assets.clear()
+    operating_cashflow.clear()
+    capital_expendiatures.clear()
 
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
@@ -61,6 +65,14 @@ def parse_Balance(tick):
         liabilities.append(i['totalLiabilities'])
         equities.append(i['totalShareholderEquity'])
         assets.append(i['totalAssets'])
+
+def parse_Cash(tick):
+    path = './data/' + tick + '/' + tick + '_cash.json'
+    f = open(path)
+    data = json.load(f)
+    for i in data['quarterlyReports']:
+        operating_cashflow.append(i['operatingCashflow'])
+        capital_expendiatures.append(i['capitalExpenditures'])
 
 def calc_EV(tick):
     cap = round(float(close[0])) * int(volume[0])
@@ -94,17 +106,25 @@ def calc_ROIC():
     oi = 0
     ic = 0
     nopat = 0
-    if(income_before_tax != 'None'): ibt = int(income_before_tax[0])
-    if(income_tax_expense != 'None'): ite = int(income_tax_expense[0])
-    if(operating_income != 'None'): oi = int(operating_income[0])
+    if(income_before_tax[0] != 'None'): ibt = int(income_before_tax[0])
+    if(income_tax_expense[0] != 'None'): ite = int(income_tax_expense[0])
+    if(operating_income[0] != 'None'): oi = int(operating_income[0])
     if(assets != 'None'): ic = int(assets[0])
     nopat = oi*(1-(ite/ibt))
     return nopat/ic
+
+def calc_FCFY():
+    oc = 0
+    ce = 0
+    if(operating_cashflow[0] != 'None'): oc = int(operating_cashflow[0])
+    if(capital_expendiatures[0] != 'None'): ce = int(capital_expendiatures[0])
+    return oc-ce
 
 def full_Parse(tick):
     parse_Daily(tick)
     parse_Income(tick)
     parse_Balance(tick)
+    parse_Cash(tick)
 
 def full_Analysis(tick):
     res = str(calc_EVEBITDA(tick))
@@ -113,6 +133,8 @@ def full_Analysis(tick):
     print("The D/E for " + tick + " is " + res)
     res = str(calc_ROIC())
     print("THE ROIC for " + tick + " is " + res)
+    res = str(calc_FCFY())
+    print("The FCFY for " + tick + " is " + res)
 
 f = open("tickers.txt","r")
 for x in f:

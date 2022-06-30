@@ -39,9 +39,19 @@ def get_Balance(tick):
     with open(path,'wb') as file:
         file.write(response.content)
 
+def get_Cash(tick):
+    path = './data/' + tick + '/' + tick + '_cash.json'
+    params = {'function': 'CASH_FLOW',
+		 'symbol': tick, 
+		 'apikey': api_key}
+    response = requests.get(base_url,params=params)
+    with open(path,'wb') as file:
+        file.write(response.content)
+
 for tick in tickers:
     get_Daily(tick)
     get_Income(tick)
     get_Balance(tick)
+    get_Cash(tick)
     print(tick + " has finished collecting.")
     time.sleep(65) #Necessary for free version 5 calls/minute restriction
