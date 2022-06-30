@@ -13,6 +13,10 @@ longdebt = []
 shortdebt = []
 liabilities = []
 equities = []
+income_before_tax = []
+income_tax_expense = []
+operating_income = []
+assets = []
 
 def clearLists():
     close.clear()
@@ -23,6 +27,10 @@ def clearLists():
     shortdebt.clear()
     liabilities.clear()
     equities.clear()
+    income_before_tax.clear()
+    income_tax_expense.clear()
+    operating_income.clear()
+    assets.clear()
 
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
@@ -38,6 +46,9 @@ def parse_Income(tick):
     data = json.load(f)
     for i in data['quarterlyReports']:
         ebitda_list.append(i['ebitda'])
+        income_before_tax.append(i['incomeBeforeTax'])
+        income_tax_expense.append(i['incomeTaxExpense'])
+        operating_income.append(i['operatingExpenses'])
 
 def parse_Balance(tick):
     path = './data/' + tick + '/' + tick + '_balance.json'
@@ -49,6 +60,7 @@ def parse_Balance(tick):
         shortdebt.append(i['shortLongTermDebtTotal'])
         liabilities.append(i['totalLiabilities'])
         equities.append(i['totalShareholderEquity'])
+        assets.append(i['totalAssets'])
 
 def calc_EV(tick):
     cap = round(float(close[0])) * int(volume[0])
@@ -76,6 +88,19 @@ def calc_DE():
     if(equities[0] != 'None'): equity = int(equities[0])
     return debt/equity
 
+def calc_ROIC():
+    ibt = 0
+    ite = 0
+    oi = 0
+    ic = 0
+    nopat = 0
+    if(income_before_tax != 'None'): ibt = int(income_before_tax[0])
+    if(income_tax_expense != 'None'): ite = int(income_tax_expense[0])
+    if(operating_income != 'None'): oi = int(operating_income[0])
+    if(assets != 'None'): ic = int(assets[0])
+    nopat = oi*(1-(ite/ibt))
+    return nopat/ic
+
 def full_Parse(tick):
     parse_Daily(tick)
     parse_Income(tick)
@@ -86,6 +111,8 @@ def full_Analysis(tick):
     print("The EVEBITDA for " + tick + " is " + res)
     res = str(calc_DE())
     print("The D/E for " + tick + " is " + res)
+    res = str(calc_ROIC())
+    print("THE ROIC for " + tick + " is " + res)
 
 f = open("tickers.txt","r")
 for x in f:
