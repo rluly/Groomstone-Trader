@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 # import pandas as pd
 
 #set up your api key as an environment variable ALPHAVANTAGE_API_KEY
@@ -42,3 +43,4 @@ for tick in tickers:
     get_Daily(tick)
     get_Income(tick)
     get_Balance(tick)
+    time.sleep(65)
