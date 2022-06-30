@@ -11,6 +11,14 @@ cash = []
 longdebt = []
 shortdebt = []
 
+def clearLists():
+    close.clear()
+    volume.clear()
+    ebitda_list.clear()
+    cash.clear()
+    longdebt.clear()
+    shortdebt.clear()
+
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
     with open(path, newline='') as csvfile:
@@ -37,7 +45,14 @@ def parse_Balance(tick):
 
 def calc_EV(tick):
     cap = round(float(close[0])) * int(volume[0])
-    ev = cap + int(longdebt[0]) + int(shortdebt[0]) - int(cash[0])
+    long = 0
+    short = 0
+    cash_res = 0
+    if(longdebt[0] != 'None'): long = int(longdebt[0])
+    if(shortdebt[0] != 'None'): short = int(shortdebt[0])
+    if(cash[0] != 'None'): cash_res = int(cash[0])
+    ev = cap + long + short - cash_res
+    # print("The EV for " + tick + " is " + str(ev))
     return ev
 
 def calc_EBITDA(tick):
@@ -53,7 +68,8 @@ def full_Parse(tick):
     parse_Balance(tick)
 
 def full_Analysis(tick):
-    print(calc_EVEBITDA(tick))
+    res = str(calc_EVEBITDA(tick))
+    print("The EVEBITDA for " + tick + " is " + res)
 
 f = open("tickers.txt","r")
 for x in f:
@@ -62,3 +78,4 @@ for x in f:
 for tick in tickers:
     full_Parse(tick)
     full_Analysis(tick)
+    clearLists()
