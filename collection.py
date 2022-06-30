@@ -1,50 +1,44 @@
-#set up your api key as an environment variable ALPHAVANTAGE_API_KEY
-
-# from alpha_vantage.timeseries import TimeSeries
-# from alpha_vantage.foreignexchange import ForeignExchange
-# from alpha_vantage.cryptocurrencies import CryptoCurrencies
-# from alpha_vantage.techindicators import TechIndicators
-# from alpha_vantage.sectorperformance import SectorPerformances
 import os
 import requests
-import pandas as pd
+# import pandas as pd
 
-# app = TimeSeries()
-# aapl = app.get_daily(symbol='AAPL',outputsize='compact')
-# print(aapl)
-
+#set up your api key as an environment variable ALPHAVANTAGE_API_KEY
 api_key = os.getenv('ALPHAVANTAGE_API_KEY')
-
-#Market Cap(Share price, Volume)
 base_url = 'https://www.alphavantage.co/query?'
-params = {'function': 'TIME_SERIES_DAILY',
-		 'symbol': 'IBM', 
+tickers = []
+f = open("tickers.txt","r")
+for x in f:
+    tickers.append(x.strip())
+
+def get_Daily(tick):
+    path = './data/' + tick + '/' + tick + '_daily.csv'
+    params = {'function': 'TIME_SERIES_DAILY',
+		 'symbol': tick, 
          'datatype': 'csv',
 		 'apikey': api_key}
+    response = requests.get(base_url,params=params)
+    with open(path,'wb') as file:
+        file.write(response.content)
 
-response = requests.get(base_url,params=params)
-with open('./data/IBM_daily.csv','wb') as file:
-    file.write(response.content)
-
-#EBITA (as is)
-base_url = 'https://www.alphavantage.co/query?'
-params = {'function': 'INCOME_STATEMENT',
-		 'symbol': 'IBM', 
+def get_Income(tick):
+    path = './data/' + tick + '/' + tick + '_income.json'
+    params = {'function': 'INCOME_STATEMENT',
+		 'symbol': tick, 
 		 'apikey': api_key}
+    response = requests.get(base_url,params=params)
+    with open(path,'wb') as file:
+        file.write(response.content)
 
-response = requests.get(base_url,params=params)
-with open('./data/IBM_income.json','wb') as file:
-    file.write(response.content)
-
-#EV (long debt, short debt, and cash)
-base_url = 'https://www.alphavantage.co/query?'
-params = {'function': 'BALANCE_SHEET',
-		 'symbol': 'IBM', 
+def get_Balance(tick):
+    path = './data/' + tick + '/' + tick + '_balance.json'
+    params = {'function': 'BALANCE_SHEET',
+		 'symbol': tick, 
 		 'apikey': api_key}
+    response = requests.get(base_url,params=params)
+    with open(path,'wb') as file:
+        file.write(response.content)
 
-response = requests.get(base_url,params=params)
-with open('./data/IBM_balance.json','wb') as file:
-    file.write(response.content)
-
-# df = pd.read_csv('./data/IBM.csv')
-# df.set_index('timestamp',inplace=True)
+for tick in tickers:
+    get_Daily(tick)
+    get_Income(tick)
+    get_Balance(tick)
