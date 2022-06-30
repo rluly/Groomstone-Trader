@@ -43,4 +43,5 @@ for tick in tickers:
     get_Daily(tick)
     get_Income(tick)
     get_Balance(tick)
-    time.sleep(65)
+    print(tick," has finished collecting.")
+    time.sleep(65) #Necessary for free version 5 calls/minute restriction
