@@ -15,6 +15,17 @@ import pandas as pd
 
 api_key = os.getenv('ALPHAVANTAGE_API_KEY')
 
+#Market Cap(Share price, Volume)
+base_url = 'https://www.alphavantage.co/query?'
+params = {'function': 'TIME_SERIES_DAILY',
+		 'symbol': 'IBM', 
+         'datatype': 'csv',
+		 'apikey': api_key}
+
+response = requests.get(base_url,params=params)
+with open('./data/IBM_daily.csv','wb') as file:
+    file.write(response.content)
+
 #EBITA (as is)
 base_url = 'https://www.alphavantage.co/query?'
 params = {'function': 'INCOME_STATEMENT',
