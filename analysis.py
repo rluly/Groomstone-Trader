@@ -1,4 +1,5 @@
 # Imports
+from cmath import e
 import csv
 import json
 
@@ -10,6 +11,8 @@ ebitda_list = []
 cash = []
 longdebt = []
 shortdebt = []
+liabilities = []
+equities = []
 
 def clearLists():
     close.clear()
@@ -18,6 +21,8 @@ def clearLists():
     cash.clear()
     longdebt.clear()
     shortdebt.clear()
+    liabilities.clear()
+    equities.clear()
 
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
@@ -42,6 +47,8 @@ def parse_Balance(tick):
         cash.append(i['cashAndCashEquivalentsAtCarryingValue'])
         longdebt.append(i['currentLongTermDebt'])
         shortdebt.append(i['shortLongTermDebtTotal'])
+        liabilities.append(i['totalLiabilities'])
+        equities.append(i['totalShareholderEquity'])
 
 def calc_EV(tick):
     cap = round(float(close[0])) * int(volume[0])
@@ -62,6 +69,13 @@ def calc_EBITDA(tick):
 def calc_EVEBITDA(tick):
     return calc_EV(tick)/calc_EBITDA(tick)
 
+def calc_DE():
+    debt = 0
+    equity = 0
+    if(liabilities[0] != 'None'): debt = int(liabilities[0])
+    if(equities[0] != 'None'): equity = int(equities[0])
+    return debt/equity
+
 def full_Parse(tick):
     parse_Daily(tick)
     parse_Income(tick)
@@ -70,6 +84,8 @@ def full_Parse(tick):
 def full_Analysis(tick):
     res = str(calc_EVEBITDA(tick))
     print("The EVEBITDA for " + tick + " is " + res)
+    res = str(calc_DE())
+    print("The D/E for " + tick + " is " + res)
 
 f = open("tickers.txt","r")
 for x in f:
