@@ -9,6 +9,11 @@ rs.login(username= robin_user,
          expiresIn=86400,
          by_sms=True)
 
+rs.orders.order_buy_fractional_by_price('NVDA',
+                                       100,
+                                       timeInForce='gtc',
+                                       extendedHours=False) 
+
 rs.account.get_all_positions()
 
 rs.logout()
