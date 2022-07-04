@@ -1,7 +1,6 @@
 import os
 import requests
 import time
-# import pandas as pd
 
 #set up your api key as an environment variable ALPHAVANTAGE_API_KEY
 api_key = os.getenv('ALPHAVANTAGE_API_KEY')
@@ -13,8 +12,9 @@ for x in f:
 
 def get_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
-    params = {'function': 'TIME_SERIES_DAILY',
-		 'symbol': tick, 
+    params = {'function': 'TIME_SERIES_DAILY_ADJUSTED',
+		 'symbol': tick,
+         'outputsize' : 'compact', 
          'datatype': 'csv',
 		 'apikey': api_key}
     response = requests.get(base_url,params=params)
@@ -48,10 +48,30 @@ def get_Cash(tick):
     with open(path,'wb') as file:
         file.write(response.content)
 
+def get_Earnings(tick):
+    path = './data/' + tick + '/' + tick + '_earnings.json'
+    params = {'function': 'Earnings',
+		 'symbol': tick, 
+		 'apikey': api_key}
+    response = requests.get(base_url,params=params)
+    with open(path,'wb') as file:
+        file.write(response.content)
+
+def get_Overview(tick):
+    path = './data/' + tick + '/' + tick + '_overview.json'
+    params = {'function': 'Company Overview',
+		 'symbol': tick, 
+		 'apikey': api_key}
+    response = requests.get(base_url,params=params)
+    with open(path,'wb') as file:
+        file.write(response.content)
+
 for tick in tickers:
     get_Daily(tick)
     get_Income(tick)
     get_Balance(tick)
     get_Cash(tick)
+    get_Earnings(tick)
+    get_Overview(tick)
     print(tick + " has finished collecting.")
-    time.sleep(65) #Necessary for free version 5 calls/minute restriction
+    time.sleep(10) #Necessary for 75 calls/minute restriction
