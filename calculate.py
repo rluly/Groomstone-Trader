@@ -127,14 +127,25 @@ def full_Parse(tick):
     parse_Cash(tick)
 
 def full_Analysis(tick):
-    res = str(calc_EVEBITDA(tick))
-    print("The EVEBITDA for " + tick + " is " + res)
-    res = str(calc_DE())
-    print("The D/E for " + tick + " is " + res)
-    res = str(calc_ROIC())
-    print("THE ROIC for " + tick + " is " + res)
-    res = str(calc_FCFY())
-    print("The FCFY for " + tick + " is " + res)
+    path = './data/' + tick + '/' + tick + '_calc.csv'
+    with open(path, 'w') as f:
+        res = str(calc_EVEBITDA(tick))
+        print("The EVEBITDA for " + tick + " is " + res)
+        f.write(res)
+        f.write('\n')
+        res = str(calc_DE())
+        print("The D/E for " + tick + " is " + res)
+        f.write(res)
+        f.write('\n')
+        res = str(calc_ROIC())
+        print("THE ROIC for " + tick + " is " + res)
+        f.write(res)
+        f.write('\n')
+        res = str(calc_FCFY())
+        print("The FCFY for " + tick + " is " + res)
+        f.write(res)
+        f.write('\n')
+    f.close()
 
 f = open("tickers.txt","r")
 for x in f:

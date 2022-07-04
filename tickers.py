@@ -19,13 +19,13 @@ with open("stocks-list.csv", newline='') as csvfile:
             symbol.append(row['ï»¿Symbol'])
             industry.append(row['Industry'])
 
-with open('tickers.txt', 'a') as f:
+with open('tickers.txt', 'w') as f:
     for x in symbol:
         f.write(x)
         f.write('\n')
 f.close()
 
-with open('industry.txt', 'a') as f:
+with open('industry.txt', 'w') as f:
     for x in industry:
         f.write(x)
         f.write('\n')
