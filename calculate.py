@@ -120,6 +120,21 @@ def calc_FCFY():
     if(capital_expendiatures[0] != 'None'): ce = int(capital_expendiatures[0])
     return oc-ce
 
+def calc_WACC():
+    E = round(float(close[0])) * int(volume[0])
+    D = 0
+    ibt = 0
+    ite = 0
+    Re = 0
+    Rd = 0
+    if(liabilities[0] != 'None'): D = int(liabilities[0])
+    V = E + D
+    if(income_before_tax[0] != 'None'): ibt = int(income_before_tax[0])
+    if(income_tax_expense[0] != 'None'): ite = int(income_tax_expense[0])
+    T = ite/ibt
+
+
+
 def full_Parse(tick):
     parse_Daily(tick)
     parse_Income(tick)
