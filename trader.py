@@ -9,12 +9,14 @@ rs.login(username= robin_user,
          expiresIn=86400,
          by_sms=True)
 
-# rs.orders.order_buy_fractional_by_price('NVDA',
-#                                        100,
-#                                        timeInForce='gtc',
-#                                        extendedHours=False) 
+ticker = "NVDA"
+amount = 100
 
-positions = rs.account.get_all_positions()
-print(positions)
+order = rs.orders.order_buy_fractional_by_price(symbol = ticker,
+                                       amountInDollars = amount,) 
+print("BOT: Groomstone has bought " + order['quantity'] + " of " + ticker +  " at " + order['price'] + ".")
+
+# positions = rs.account.get_all_positions()
+# print(positions)
 
 rs.logout()
