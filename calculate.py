@@ -19,6 +19,7 @@ operating_income = []
 assets = []
 operating_cashflow = []
 capital_expendiatures = []
+tenyear = 0.0
 
 def clearLists():
     close.clear()
@@ -74,6 +75,14 @@ def parse_Cash(tick):
         operating_cashflow.append(i['operatingCashflow'])
         capital_expendiatures.append(i['capitalExpenditures'])
 
+def parse_Treasury():
+    path = './economy/Treasury_Yield.csv'
+    with open(path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            tenyear = float(row['value'])
+            break
+
 def calc_EV(tick):
     cap = round(float(close[0])) * int(volume[0])
     long = 0
@@ -87,7 +96,8 @@ def calc_EV(tick):
     return ev
 
 def calc_EBITDA(tick):
-    ebitda = int(ebitda_list[0])
+    ebitda = 0
+    if(ebitda_list[0] == 'None'): ebitda = int(ebitda_list[0])
     return ebitda
 
 def calc_EVEBITDA(tick):
@@ -127,6 +137,7 @@ def calc_WACC():
     ite = 0
     Re = 0
     Rd = 0
+    Rf = tenyear
     if(liabilities[0] != 'None'): D = int(liabilities[0])
     V = E + D
     if(income_before_tax[0] != 'None'): ibt = int(income_before_tax[0])
@@ -143,30 +154,25 @@ def full_Parse(tick):
 
 def full_Analysis(tick):
     path = './data/' + tick + '/' + tick + '_calc.csv'
-    with open(path, 'w') as f:
-        res = str(calc_EVEBITDA(tick))
-        print("The EVEBITDA for " + tick + " is " + res)
-        f.write(res)
-        f.write('\n')
-        res = str(calc_DE())
-        print("The D/E for " + tick + " is " + res)
-        f.write(res)
-        f.write('\n')
-        res = str(calc_ROIC())
-        print("THE ROIC for " + tick + " is " + res)
-        f.write(res)
-        f.write('\n')
-        res = str(calc_FCFY())
-        print("The FCFY for " + tick + " is " + res)
-        f.write(res)
-        f.write('\n')
+    with open(path, 'w', newline = '') as f:
+        fieldnames = ['Tick','EV/EBITDA','D/E','ROIC-WACC','FCFY']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        EVEBITDA = str(calc_EVEBITDA(tick))
+        DE = str(calc_DE())
+        ROICWACC = str(calc_ROIC())
+        FCFY = str(calc_FCFY())
+        writer.writerow({'Tick': tick, 'EV/EBITDA': EVEBITDA, 'D/E': DE, 'ROIC-WACC': ROICWACC,'FCFY': FCFY})
     f.close()
 
+parse_Treasury()
 f = open("tickers.txt","r")
 for x in f:
     tickers.append(x.strip())
 
 for tick in tickers:
     full_Parse(tick)
+    print(tick + " is finished parsing.")
     full_Analysis(tick)
+    print(tick + " is finished analyzing.")
     clearLists()
