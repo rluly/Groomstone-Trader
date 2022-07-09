@@ -5,6 +5,8 @@ import json
 
 # Global Vars
 tickers = []
+industry = []
+names = []
 close = []
 volume = []
 ebitda_list = []
@@ -22,6 +24,10 @@ capital_expendiatures = []
 beta = 0.0
 tenyear = 0.0
 Rm = 0.0
+PB = 0.0
+PEG = 0.0
+PE = 0.0
+bookvalue = 0.0
 
 def clearLists():
     close.clear()
@@ -39,6 +45,12 @@ def clearLists():
     operating_cashflow.clear()
     capital_expendiatures.clear()
     beta = 0.0
+    tenyear = 0.0
+    Rm = 0.0
+    PB = 0.0
+    PEG = 0.0
+    PE = 0.0
+    bookvalue = 0.0
 
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
@@ -90,7 +102,11 @@ def parse_Overview(tick):
     path = './data/' + tick + '/' + tick + '_overview.json'
     f = open(path)
     data = json.load(f)
-    beta = data['Beta']
+    if(data['Beta'] != 'None'): beta = data['Beta']
+    if(data['PriceToBookRatio'] != 'None'): PB = data['PriceToBookRatio']
+    if(data['PERatio'] != 'None'): PE = data['PERatio']
+    if(data['PEGRatio'] != 'None'): PEG = data['PEGRatio']
+    if(data['BookValue'] != 'None'): bookvalue = data['BookValue']
 
 def parse_VTI():
     path = './data/VTI_daily.csv'
@@ -169,10 +185,6 @@ def calc_WACC():
 def calc_ROICWACC():
     return calc_ROIC() - calc_WACC()
 
-def calc_Quick():
-    return 0
-
-
 def full_Parse(tick):
     parse_Daily(tick)
     parse_Income(tick)
@@ -183,22 +195,46 @@ def full_Parse(tick):
 def full_Analysis(tick):
     path = './data/' + tick + '/' + tick + '_calc.csv'
     with open(path, 'w', newline = '') as f:
-        fieldnames = ['Tick','EV/EBITDA','D/E','ROIC-WACC','FCFY']
+        fieldnames = ['Tick','Name','Industry','EV/EBITDA','D/E','ROIC-WACC','FCFY','P/E','P/B','Book Value','PEG','Beta']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
+        name = names[tickers.index(tick)]
+        industry = industry[tickers.index(tick)]
         EVEBITDA = str(calc_EVEBITDA())
         DE = str(calc_DE())
         ROICWACC = str(calc_ROICWACC())
         FCFY = str(calc_FCFY())
-        Quick = str(calc_Quick())
-        writer.writerow({'Tick': tick, 'EV/EBITDA': EVEBITDA, 'D/E': DE, 'ROIC-WACC': ROICWACC,'FCFY': FCFY, 'Quick Ratio': Quick})
+        writer.writerow({'Tick': tick,
+        'Name': name,
+        'Industry': industry,
+        'EV/EBITDA': EVEBITDA,
+        'D/E': DE,
+        'ROIC-WACC': ROICWACC,
+        'FCFY': FCFY,
+        'P/E': PE,
+        'P/B': PB,
+        'Book Value': bookvalue,
+        'PEG': PEG,
+        'Beta': beta})
     f.close()
 
 parse_Treasury()
 parse_VTI()
+
 f = open("tickers.txt","r")
 for x in f:
     tickers.append(x.strip())
+f.close()
+
+f = open("industry.txt","r")
+for x in f:
+    industry.append(x.strip())
+f.close()
+
+f = open("names.txt","r")
+for x in f:
+    names.append(x.strip())
+f.close()
 
 for tick in tickers:
     full_Parse(tick)
