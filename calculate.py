@@ -19,7 +19,9 @@ operating_income = []
 assets = []
 operating_cashflow = []
 capital_expendiatures = []
+beta = 0.0
 tenyear = 0.0
+Rm = 0.0
 
 def clearLists():
     close.clear()
@@ -36,6 +38,7 @@ def clearLists():
     assets.clear()
     operating_cashflow.clear()
     capital_expendiatures.clear()
+    beta = 0.0
 
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
@@ -83,7 +86,26 @@ def parse_Treasury():
             tenyear = float(row['value'])
             break
 
-def calc_EV(tick):
+def parse_Overview(tick):
+    path = './data/' + tick + '/' + tick + '_overview.json'
+    f = open(path)
+    data = json.load(f)
+    beta = data['Beta']
+
+def parse_VTI():
+    path = './data/VTI_daily.csv'
+    with open(path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        x = 0
+        start = 0
+        finish = 0
+        for row in reader:
+            if(x == 0): finish = row['high']
+            elif(x == 255): start = row['high']
+            x = x + 1
+    rm = finish/start
+
+def calc_EV():
     cap = round(float(close[0])) * int(volume[0])
     long = 0
     short = 0
@@ -92,15 +114,14 @@ def calc_EV(tick):
     if(shortdebt[0] != 'None'): short = int(shortdebt[0])
     if(cash[0] != 'None'): cash_res = int(cash[0])
     ev = cap + long + short - cash_res
-    # print("The EV for " + tick + " is " + str(ev))
     return ev
 
-def calc_EBITDA(tick):
+def calc_EBITDA():
     ebitda = 0
     if(ebitda_list[0] == 'None'): ebitda = int(ebitda_list[0])
     return ebitda
 
-def calc_EVEBITDA(tick):
+def calc_EVEBITDA():
     return calc_EV(tick)/calc_EBITDA(tick)
 
 def calc_DE():
@@ -136,14 +157,20 @@ def calc_WACC():
     ibt = 0
     ite = 0
     Re = 0
-    Rd = 0
-    Rf = tenyear
+    Rd = 0.04
     if(liabilities[0] != 'None'): D = int(liabilities[0])
     V = E + D
     if(income_before_tax[0] != 'None'): ibt = int(income_before_tax[0])
     if(income_tax_expense[0] != 'None'): ite = int(income_tax_expense[0])
     T = ite/ibt
+    Re = tenyear + beta * (Rm - T)
+    return (((E/V) * Re) + ((D/V * Rd) * (1-T)))
 
+def calc_ROICWACC():
+    return calc_ROIC() - calc_WACC()
+
+def calc_Quick():
+    return 0
 
 
 def full_Parse(tick):
@@ -151,6 +178,7 @@ def full_Parse(tick):
     parse_Income(tick)
     parse_Balance(tick)
     parse_Cash(tick)
+    parse_Overview(tick)
 
 def full_Analysis(tick):
     path = './data/' + tick + '/' + tick + '_calc.csv'
@@ -158,14 +186,16 @@ def full_Analysis(tick):
         fieldnames = ['Tick','EV/EBITDA','D/E','ROIC-WACC','FCFY']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        EVEBITDA = str(calc_EVEBITDA(tick))
+        EVEBITDA = str(calc_EVEBITDA())
         DE = str(calc_DE())
-        ROICWACC = str(calc_ROIC())
+        ROICWACC = str(calc_ROICWACC())
         FCFY = str(calc_FCFY())
-        writer.writerow({'Tick': tick, 'EV/EBITDA': EVEBITDA, 'D/E': DE, 'ROIC-WACC': ROICWACC,'FCFY': FCFY})
+        Quick = str(calc_Quick())
+        writer.writerow({'Tick': tick, 'EV/EBITDA': EVEBITDA, 'D/E': DE, 'ROIC-WACC': ROICWACC,'FCFY': FCFY, 'Quick Ratio': Quick})
     f.close()
 
 parse_Treasury()
+parse_VTI()
 f = open("tickers.txt","r")
 for x in f:
     tickers.append(x.strip())

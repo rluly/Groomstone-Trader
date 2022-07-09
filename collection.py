@@ -67,22 +67,11 @@ def get_Overview(tick):
         file.write(response.content)
 
 for tick in tickers:
-    # get_Daily(tick)
-    # get_Income(tick)
-    # get_Balance(tick)
-    # get_Cash(tick)
-    # get_Earnings(tick)
+    get_Daily(tick)
+    get_Income(tick)
+    get_Balance(tick)
+    get_Cash(tick)
+    get_Earnings(tick)
     get_Overview(tick)
     print(tick + " has finished collecting.")
     time.sleep(1) #Necessary for 75 calls/minute restriction
-
-# for x in range(500):
-#     tick = tickers[x]
-#     get_Daily(tick)
-#     get_Income(tick)
-#     get_Balance(tick)
-#     get_Cash(tick)
-#     get_Earnings(tick)
-#     get_Overview(tick)
-#     print(tick + " has finished collecting.")
-#     time.sleep(10) #Necessary for 75 calls/minute restriction
