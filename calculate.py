@@ -5,7 +5,7 @@ import json
 
 # Global Vars
 tickers = []
-industry = []
+industries = []
 names = []
 close = []
 volume = []
@@ -109,15 +109,15 @@ def parse_Overview(tick):
     if(data['BookValue'] != 'None'): bookvalue = data['BookValue']
 
 def parse_VTI():
-    path = './data/VTI_daily.csv'
+    path = './data/VTI/VTI_daily.csv'
     with open(path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         x = 0
         start = 0
         finish = 0
         for row in reader:
-            if(x == 0): finish = row['high']
-            elif(x == 255): start = row['high']
+            if(x == 0): finish = float(row['high'])
+            elif(x == 255): start = float(row['high'])
             x = x + 1
     rm = finish/start
 
@@ -134,18 +134,20 @@ def calc_EV():
 
 def calc_EBITDA():
     ebitda = 0
-    if(ebitda_list[0] == 'None'): ebitda = int(ebitda_list[0])
+    if(ebitda_list[0] != 'None'): ebitda = int(ebitda_list[0])
     return ebitda
 
 def calc_EVEBITDA():
-    return calc_EV(tick)/calc_EBITDA(tick)
+    if(calc_EBITDA() != 0): return calc_EV()/calc_EBITDA()
+    else: return 17.12
 
 def calc_DE():
     debt = 0
     equity = 0
     if(liabilities[0] != 'None'): debt = int(liabilities[0])
     if(equities[0] != 'None'): equity = int(equities[0])
-    return debt/equity
+    if(equity != 0): return debt/equity
+    else: return 0
 
 def calc_ROIC():
     ibt = 0
@@ -156,9 +158,10 @@ def calc_ROIC():
     if(income_before_tax[0] != 'None'): ibt = int(income_before_tax[0])
     if(income_tax_expense[0] != 'None'): ite = int(income_tax_expense[0])
     if(operating_income[0] != 'None'): oi = int(operating_income[0])
-    if(assets != 'None'): ic = int(assets[0])
-    nopat = oi*(1-(ite/ibt))
-    return nopat/ic
+    if(assets[0] != 'None'): ic = int(assets[0])
+    if(ibt != 0): nopat = oi*(1-(ite/ibt))
+    if(ic != 0): return nopat/ic
+    else: return 0
 
 def calc_FCFY():
     oc = 0
@@ -174,13 +177,15 @@ def calc_WACC():
     ite = 0
     Re = 0
     Rd = 0.04
+    T = 0
     if(liabilities[0] != 'None'): D = int(liabilities[0])
     V = E + D
     if(income_before_tax[0] != 'None'): ibt = int(income_before_tax[0])
     if(income_tax_expense[0] != 'None'): ite = int(income_tax_expense[0])
-    T = ite/ibt
+    if(ibt != 0): T = ite/ibt
     Re = tenyear + beta * (Rm - T)
-    return (((E/V) * Re) + ((D/V * Rd) * (1-T)))
+    if(V != 0): return (((E/V) * Re) + ((D/V * Rd) * (1-T)))
+    else: return 0
 
 def calc_ROICWACC():
     return calc_ROIC() - calc_WACC()
@@ -194,12 +199,12 @@ def full_Parse(tick):
 
 def full_Analysis(tick):
     path = './data/' + tick + '/' + tick + '_calc.csv'
+    name = names[tickers.index(tick)]
+    industry = industries[tickers.index(tick)]
     with open(path, 'w', newline = '') as f:
         fieldnames = ['Tick','Name','Industry','EV/EBITDA','D/E','ROIC-WACC','FCFY','P/E','P/B','Book Value','PEG','Beta']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        name = names[tickers.index(tick)]
-        industry = industry[tickers.index(tick)]
         EVEBITDA = str(calc_EVEBITDA())
         DE = str(calc_DE())
         ROICWACC = str(calc_ROICWACC())
@@ -217,6 +222,22 @@ def full_Analysis(tick):
         'PEG': PEG,
         'Beta': beta})
     f.close()
+    if(industry == 'Blank Check / SPAC'): path = './industry/SPAC.csv'
+    elif(industry == 'n/a'): path = './industry/NA.csv'
+    else: path = './industry/' + industry + '.csv'
+    with open(path, 'a', newline = '') as f:
+        writer = csv.writer(f)
+        writer.writerow({'Tick': tick,
+        'Name': name,
+        'EV/EBITDA': EVEBITDA,
+        'D/E': DE,
+        'ROIC-WACC': ROICWACC,
+        'FCFY': FCFY,
+        'P/E': PE,
+        'P/B': PB,
+        'Book Value': bookvalue,
+        'PEG': PEG,
+        'Beta': beta})
 
 parse_Treasury()
 parse_VTI()
@@ -228,7 +249,7 @@ f.close()
 
 f = open("industry.txt","r")
 for x in f:
-    industry.append(x.strip())
+    industries.append(x.strip())
 f.close()
 
 f = open("names.txt","r")
