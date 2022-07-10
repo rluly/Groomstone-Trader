@@ -7,6 +7,7 @@ import json
 tickers = []
 industries = []
 names = []
+unique_industries = []
 close = []
 volume = []
 ebitda_list = []
@@ -21,13 +22,13 @@ operating_income = []
 assets = []
 operating_cashflow = []
 capital_expendiatures = []
-beta = 0.0
-tenyear = 0.0
-Rm = 0.0
-PB = 0.0
-PEG = 0.0
-PE = 0.0
-bookvalue = 0.0
+beta = []
+tenyear = []
+rm = []
+PB = []
+PEG = []
+PE = []
+bookvalue = []
 
 def clearLists():
     close.clear()
@@ -44,13 +45,13 @@ def clearLists():
     assets.clear()
     operating_cashflow.clear()
     capital_expendiatures.clear()
-    beta = 0.0
-    tenyear = 0.0
-    Rm = 0.0
-    PB = 0.0
-    PEG = 0.0
-    PE = 0.0
-    bookvalue = 0.0
+    beta.clear()
+    tenyear.clear()
+    rm.clear()
+    PB.clear()
+    PEG.clear()
+    PE.clear()
+    bookvalue.clear()
 
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
@@ -95,18 +96,18 @@ def parse_Treasury():
     with open(path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            tenyear = float(row['value'])
+            tenyear.append(float(row['value']))
             break
 
 def parse_Overview(tick):
     path = './data/' + tick + '/' + tick + '_overview.json'
     f = open(path)
     data = json.load(f)
-    if(data['Beta'] != 'None'): beta = data['Beta']
-    if(data['PriceToBookRatio'] != 'None'): PB = data['PriceToBookRatio']
-    if(data['PERatio'] != 'None'): PE = data['PERatio']
-    if(data['PEGRatio'] != 'None'): PEG = data['PEGRatio']
-    if(data['BookValue'] != 'None'): bookvalue = data['BookValue']
+    if(data['Beta'] != 'None'): beta.append(data['Beta'])
+    if(data['PriceToBookRatio'] != 'None'): PB.append(data['PriceToBookRatio'])
+    if(data['PERatio'] != 'None'): PE.append(data['PERatio'])
+    if(data['PEGRatio'] != 'None'): PEG.append(data['PEGRatio'])
+    if(data['BookValue'] != 'None'): bookvalue.append(data['BookValue'])
 
 def parse_VTI():
     path = './data/VTI/VTI_daily.csv'
@@ -119,7 +120,7 @@ def parse_VTI():
             if(x == 0): finish = float(row['high'])
             elif(x == 255): start = float(row['high'])
             x = x + 1
-    rm = finish/start
+    rm.append(finish/start)
 
 def calc_EV():
     cap = round(float(close[0])) * int(volume[0])
@@ -183,7 +184,8 @@ def calc_WACC():
     if(income_before_tax[0] != 'None'): ibt = int(income_before_tax[0])
     if(income_tax_expense[0] != 'None'): ite = int(income_tax_expense[0])
     if(ibt != 0): T = ite/ibt
-    Re = tenyear + beta * (Rm - T)
+    if((len(tenyear) != 0) and (len(beta) != 0) and (len(rm) != 0)): 
+        Re = float(tenyear[0]) + float(beta[0]) * (float(rm[0]) - T)
     if(V != 0): return (((E/V) * Re) + ((D/V * Rd) * (1-T)))
     else: return 0
 
@@ -205,6 +207,16 @@ def full_Analysis(tick):
     DE = str(calc_DE())
     ROICWACC = str(calc_ROICWACC())
     FCFY = str(calc_FCFY())
+    Pe = 0
+    Pb = 0
+    Bookvalue = 0
+    Peg = 0
+    Beta = 0
+    if(len(PE) != 0): Pe = PE[0]
+    if(len(PB) != 0): Pb = PB[0]
+    if(len(bookvalue) != 0): Bookvalue = bookvalue[0]
+    if(len(PEG) != 0): Peg = PEG[0]
+    if(len(beta) != 0): Beta = beta[0]
     with open(path, 'w', newline = '') as f:
         fieldnames = ['Tick','Name','Industry','EV/EBITDA','D/E','ROIC-WACC','FCFY','P/E','P/B','Book Value','PEG','Beta']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -216,11 +228,11 @@ def full_Analysis(tick):
         'D/E': DE,
         'ROIC-WACC': ROICWACC,
         'FCFY': FCFY,
-        'P/E': PE,
-        'P/B': PB,
-        'Book Value': bookvalue,
-        'PEG': PEG,
-        'Beta': beta})
+        'P/E': Pe,
+        'P/B': Pb,
+        'Book Value': Bookvalue,
+        'PEG': Peg,
+        'Beta': Beta})
     f.close()
 
 parse_Treasury()
@@ -239,6 +251,11 @@ f.close()
 f = open("names.txt","r")
 for x in f:
     names.append(x.strip())
+f.close()
+
+f = open("unique_industries.txt","r")
+for x in f:
+    unique_industries.append(x.strip())
 f.close()
 
 for tick in tickers:

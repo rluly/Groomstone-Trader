@@ -24,3 +24,9 @@ for x in industry:
     else: 
         path = os.path.join(parent_dir,x + '.csv')
         open(path,'w').close()
+
+with open('unique_industry.txt', 'w') as f:
+    for x in industry:
+        f.write(x)
+        f.write('\n')
+f.close()
