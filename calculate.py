@@ -28,7 +28,6 @@ rm = []
 PB = []
 PEG = []
 PE = []
-bookvalue = []
 
 def clearLists():
     close.clear()
@@ -51,7 +50,6 @@ def clearLists():
     PB.clear()
     PEG.clear()
     PE.clear()
-    bookvalue.clear()
 
 def parse_Daily(tick):
     path = './data/' + tick + '/' + tick + '_daily.csv'
@@ -107,7 +105,6 @@ def parse_Overview(tick):
     if(data['PriceToBookRatio'] != 'None'): PB.append(data['PriceToBookRatio'])
     if(data['PERatio'] != 'None'): PE.append(data['PERatio'])
     if(data['PEGRatio'] != 'None'): PEG.append(data['PEGRatio'])
-    if(data['BookValue'] != 'None'): bookvalue.append(data['BookValue'])
 
 def parse_VTI():
     path = './data/VTI/VTI_daily.csv'
@@ -207,18 +204,16 @@ def full_Analysis(tick):
     DE = str(calc_DE())
     ROICWACC = str(calc_ROICWACC())
     FCFY = str(calc_FCFY())
-    Pe = 0
-    Pb = 0
-    Bookvalue = 0
-    Peg = 0
-    Beta = 0
+    Pe = '15.97'
+    Pb = '2.94'
+    Peg = '1.56'
+    Beta = '1.0'
     if(len(PE) != 0): Pe = PE[0]
     if(len(PB) != 0): Pb = PB[0]
-    if(len(bookvalue) != 0): Bookvalue = bookvalue[0]
     if(len(PEG) != 0): Peg = PEG[0]
     if(len(beta) != 0): Beta = beta[0]
     with open(path, 'w', newline = '') as f:
-        fieldnames = ['Tick','Name','Industry','EV/EBITDA','D/E','ROIC-WACC','FCFY','P/E','P/B','Book Value','PEG','Beta']
+        fieldnames = ['Tick','Name','Industry','EV/EBITDA','D/E','ROIC-WACC','FCFY','P/E','P/B','PEG','Beta']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerow({'Tick': tick,
@@ -230,7 +225,6 @@ def full_Analysis(tick):
         'FCFY': FCFY,
         'P/E': Pe,
         'P/B': Pb,
-        'Book Value': Bookvalue,
         'PEG': Peg,
         'Beta': Beta})
     f.close()
@@ -264,3 +258,53 @@ for tick in tickers:
     full_Analysis(tick)
     print(tick + " is finished analyzing.")
     clearLists()
+
+for x in unique_industries:
+    if(x == 'Blank Check / SPAC'): path = './industry/SPAC.csv'
+    elif(x == 'n/a'): path = './industry/NA.csv'
+    else: path = './industry/' + x + '.csv'
+    with open(path, 'a', newline = '') as f:
+        fieldnames = ['Tick','Name','Industry','EV/EBITDA','D/E','ROIC-WACC','FCFY','P/E','P/B','PEG','Beta']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for y in tickers:
+            ind = industries[tickers.index(y)]
+            if x == ind:
+                name = ''
+                industry = ''
+                EVEBITDA = ''
+                DE = ''
+                ROICWACC = ''
+                FCFY = ''
+                Pe = ''
+                Pb = ''
+                Peg = ''
+                Beta = ''
+                path2 = './data/' + y + '/' + y + '_calc.csv'
+                with open(path2, 'r', newline='') as csvfile:
+                    reader = csv.DictReader(csvfile)
+                    for row in reader:
+                        name = row['Name']
+                        industry = row['Industry']
+                        EVEBITDA = row['EV/EBITDA']
+                        DE = row['D/E']
+                        ROICWACC = row['ROIC-WACC']
+                        FCFY = row['FCFY']
+                        Pe = row['P/E']
+                        Pb = row['P/B']
+                        Peg = row['PEG']
+                        Beta = row['Beta']
+                csvfile.close()
+                writer.writerow({'Tick': y,
+                'Name': name,
+                'Industry': industry,
+                'EV/EBITDA': EVEBITDA,
+                'D/E': DE,
+                'ROIC-WACC': ROICWACC,
+                'FCFY': FCFY,
+                'P/E': Pe,
+                'P/B': Pb,
+                'PEG': Peg,
+                'Beta': Beta})
+    print(x + ' is finished analyzing.')
+    f.close()
