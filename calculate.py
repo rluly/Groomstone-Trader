@@ -201,14 +201,14 @@ def full_Analysis(tick):
     path = './data/' + tick + '/' + tick + '_calc.csv'
     name = names[tickers.index(tick)]
     industry = industries[tickers.index(tick)]
+    EVEBITDA = str(calc_EVEBITDA())
+    DE = str(calc_DE())
+    ROICWACC = str(calc_ROICWACC())
+    FCFY = str(calc_FCFY())
     with open(path, 'w', newline = '') as f:
         fieldnames = ['Tick','Name','Industry','EV/EBITDA','D/E','ROIC-WACC','FCFY','P/E','P/B','Book Value','PEG','Beta']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        EVEBITDA = str(calc_EVEBITDA())
-        DE = str(calc_DE())
-        ROICWACC = str(calc_ROICWACC())
-        FCFY = str(calc_FCFY())
         writer.writerow({'Tick': tick,
         'Name': name,
         'Industry': industry,
@@ -222,22 +222,6 @@ def full_Analysis(tick):
         'PEG': PEG,
         'Beta': beta})
     f.close()
-    if(industry == 'Blank Check / SPAC'): path = './industry/SPAC.csv'
-    elif(industry == 'n/a'): path = './industry/NA.csv'
-    else: path = './industry/' + industry + '.csv'
-    with open(path, 'a', newline = '') as f:
-        writer = csv.writer(f)
-        writer.writerow({'Tick': tick,
-        'Name': name,
-        'EV/EBITDA': EVEBITDA,
-        'D/E': DE,
-        'ROIC-WACC': ROICWACC,
-        'FCFY': FCFY,
-        'P/E': PE,
-        'P/B': PB,
-        'Book Value': bookvalue,
-        'PEG': PEG,
-        'Beta': beta})
 
 parse_Treasury()
 parse_VTI()
