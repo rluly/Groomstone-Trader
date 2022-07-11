@@ -57,6 +57,20 @@ oauth = OAuth1Session(
 )
 
 get_positions = rs.build_holdings()
+get_user = rs.build_user_profile()
+value = float(get_user['equity'])
+day = 0.0
+f = open("./performance/Account.txt","r")
+for x in f:
+    day = float(x)
+f.close()
+
+f = open("./performance/Account.txt","a")
+f.write(str(value))
+f.close()
+
+update = "BOT: The total value of this account ended today at $" + value + ". This is a " + str(1 - value/day) + "% change from yesterday."
+
 f = open("champions.txt","r")
 for x in f:
     tickers.append(x.strip())
@@ -84,5 +98,23 @@ for x in tickers:
     # Saving the response as JSON
     json_response = response.json()
     print(json.dumps(json_response, indent=4, sort_keys=True))
+
+# Making the request
+payload = {"text": update}
+response = oauth.post(
+    "https://api.twitter.com/2/tweets",
+    json=payload,
+)
+
+if response.status_code != 201:
+    raise Exception(
+        "Request returned an error: {} {}".format(response.status_code, response.text)
+    )
+
+print("Response code: {}".format(response.status_code))
+
+# Saving the response as JSON
+json_response = response.json()
+print(json.dumps(json_response, indent=4, sort_keys=True))
 
 rs.logout()
