@@ -63,13 +63,12 @@ f.close()
 
 get_positions = rs.build_holdings()
 get_user = rs.build_user_profile()
-cash = float(get_user['cash'])
+buyingpower = float(get_user['cash'])
 
 for x in tickers:
     order = rs.orders.order_buy_fractional_by_price(symbol = x,
-                                                    amountInDollars = cash/8,)
+                                                    amountInDollars = buyingpower/8,)
     tweet = "BOT: Groomstone has bought " + order['quantity'] + " of " + x +  " at $" + order['price'] + "."
-    cash = cash - (float(order['quantity']) * float(order['price']))
     print(tweet)
     payload = {"text": tweet}
     response = oauth.post(
