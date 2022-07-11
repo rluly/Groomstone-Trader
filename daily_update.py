@@ -63,7 +63,7 @@ for x in f:
 f.close()
 for x in tickers:
     dict = get_positions[x]
-    path = './performance' + x + '.txt'
+    path = './performance/' + x + '.txt'
     f = open(path,"a")
     f.write(dict['price'])
     f.close()
