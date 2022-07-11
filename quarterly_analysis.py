@@ -48,6 +48,7 @@ for x in industries:
             temp2 = temp['Tick']
             winner_index = next((index for (index, d) in enumerate(tickers) if d["Tick"] == temp2), None)
             winner = tickers[winner_index]
+            print(winner)
             winners.append(winner)
         tickers.clear()
         scores.clear()
