@@ -60,9 +60,13 @@ get_positions = rs.build_holdings()
 get_user = rs.build_user_profile()
 value = float(get_user['equity'])
 day = 0.0
+first = 0.0
 f = open("./performance/Account.txt","r")
+temp = 0
 for x in f:
+    if (temp == 0): float(x)
     day = float(x)
+    temp = temp + 1
 f.close()
 
 f = open("./performance/Account.txt","a")
@@ -70,7 +74,7 @@ f.write(str(value))
 f.write("\n")
 f.close()
 
-update = "BOT: The total value of this account ended today at $" + str(value) + ". This is a " + str(((value/day) - 1) * 100) + "% change from yesterday."
+update = "BOT: The total value of this account ended today at $" + str(value) + ". This is a " + str(((value/day) - 1) * 100) + "% change from yesterday and a " + str(((value/first) - 1) * 100) + "% change from July 11, 2021."
 
 f = open("champions.txt","r")
 for x in f:
