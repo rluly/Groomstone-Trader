@@ -67,9 +67,10 @@ f.close()
 
 f = open("./performance/Account.txt","a")
 f.write(str(value))
+f.write("\n")
 f.close()
 
-update = "BOT: The total value of this account ended today at $" + value + ". This is a " + str(1 - value/day) + "% change from yesterday."
+update = "BOT: The total value of this account ended today at $" + str(value) + ". This is a " + str(((value/day) - 1) * 100) + "% change from yesterday."
 
 f = open("champions.txt","r")
 for x in f:
@@ -77,12 +78,18 @@ for x in f:
 f.close()
 for x in tickers:
     dict = get_positions[x]
+    price = float(dict['price'])
     path = './performance/' + x + '.txt'
+    f = open(path,"r")
+    for x in f:
+        day = float(x)
+    f.close()
     f = open(path,"a")
     f.write(dict['price'])
+    f.write("\n")
     f.close()
     # Making the request
-    payload = {"text": "BOT: The current price of " + x + " is $" + dict['price'] + ". The stock has moved " + dict['intraday_percent_change'] + "% today and has moved " + dict['percent_change'] + "% since purchase."}
+    payload = {"text": "BOT: The current price of " + x + " is $" + dict['price'] + ". The stock has moved " + str(((price/day) - 1) * 100) + "% today and has moved " + dict['percent_change'] + "% since purchase."}
     response = oauth.post(
         "https://api.twitter.com/2/tweets",
         json=payload,
