@@ -64,7 +64,7 @@ first = 0.0
 f = open("./performance/Account.txt","r")
 temp = 0
 for x in f:
-    if (temp == 0): float(x)
+    if (temp == 0): first = float(x)
     day = float(x)
     temp = temp + 1
 f.close()
@@ -85,8 +85,8 @@ for x in tickers:
     price = float(dict['price'])
     path = './performance/' + x + '.txt'
     f = open(path,"r")
-    for x in f:
-        day = float(x)
+    for y in f:
+        day = float(y)
     f.close()
     f = open(path,"a")
     f.write(dict['price'])
