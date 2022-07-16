@@ -74,7 +74,7 @@ f.write(str(value))
 f.write("\n")
 f.close()
 
-update = "BOT: The total value of this account ended today at $" + str(value) + ". This is a " + str(((value/day) - 1) * 100) + "% change from yesterday and a " + str(((value/first) - 1) * 100) + "% change from July 11, 2021."
+update = "BOT: The total value of this account ended today at $" + str(value) + ". This is a " + str(((value/day) - 1) * 100) + "% change since yesterday and a " + str(((value/first) - 1) * 100) + "% change since July 11, 2021."
 
 f = open("champions.txt","r")
 for x in f:
